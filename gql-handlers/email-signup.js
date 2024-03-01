@@ -12,9 +12,9 @@ const emailOtpVerifypHandler = async (req, res) => {
    console.log('verify with email', email)
    executeEmail({ email })
        .then(result => {
-           console.log("Precheck promise result:", result);
+           console.log("Precheck promise result:", result?.data?.users[0]);
            // console.dir(result);
-           res.status(200).send({result})
+           res.status(200).send(result?.data?.users[0])
        })
        .catch(error => {
            res.json({ message: 'email-signup-otp-fail' })
