@@ -3,8 +3,8 @@ import { GET_USER_DATA } from './queries/signup-queries.js';
 import { fetchGraphQL } from './util/fetch-util.js';
 
 const emailOtpVerifypHandler = async (req, res) => {
-    // let params = req.body.input;	// LIVE
-   let params = req.body;					// LOCAL
+    let params = req.body.input;	// LIVE
+//    let params = req.body;					// LOCAL
    if ('variables' in req.body) {
        params = req.body.variables;
    }
