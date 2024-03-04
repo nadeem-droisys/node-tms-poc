@@ -1,6 +1,7 @@
 
 import { GET_USER_DATA } from './queries/signup-queries.js';
 import { fetchGraphQL } from './util/fetch-util.js';
+import generator from "otp-generator";
 
 const emailOtpVerifypHandler = async (req, res) => {
     let params = req.body.input;	// LIVE
@@ -8,17 +9,34 @@ const emailOtpVerifypHandler = async (req, res) => {
    if ('variables' in req.body) {
        params = req.body.variables;
    }
-   const { email } = params;
-   console.log('verify with email', email)
+   const { email, password } = params;
+   console.log('verify with email', email, password)
    executeEmail({ email })
        .then(result => {
-           console.log("Precheck promise result:", result?.data?.users[0]);
            const user = result?.data?.users[0];
+           if(user?.id){
+            console.log("Precheck 1", result?.data?.users[0]);
+            if(password === user?.password){
+                console.log("Precheck 2")
+                if(user?.two_factor_auth){
+                    const generatedCode = generator.generate(6, {upperCaseAlphabets: false, specialChars: false, lowerCaseAlphabets:false});
+                    res.status(200).send({message:"two-factor authentication is on", code:generatedCode})
+                }else{
+                    res.status(200).send({id:user?.id, first_name:user?.first_name, last_name:user?.last_name, email:user?.email, password:user?.password,two_factor_auth:user?.two_factor_auth})
+                }
+            }else{
+                console.log("Precheck 3")
+                res.status(402).send({message:"Incorrect password."})
+            }
+           }else{
+            console.log("Precheck 4")
+            res.status(402).send({message:"Invalid credentials, no user found."})
+           }
            // console.dir(result);
-           res.status(200).send({id:user?.id, first_name:user?.first_name, last_name:user?.last_name, email:user?.email, password:user?.password,two_factor_auth:user?.two_factor_auth})
+           
        })
        .catch(error => {
-           res.json({ message: 'email-signup-otp-fail' })
+           res.json({ message: 'Email sign up failed (user not found)' })
        })
 }
 
